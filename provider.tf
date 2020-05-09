@@ -1,4 +1,4 @@
 provider "aws" {
-  region = "{{ location }}"
+  region  = "{{ location }}"
   version = "~>2.28"
 }

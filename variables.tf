@@ -2,21 +2,31 @@ variable "client_id" {}
 variable "client_secret" {}
 
 variable "cluster_name" {
-  default = "polkadot-deployer"
+  description = "Name of the EKS cluster. Also used to tag related resources"
+  default     = "polkadot-deployer"
+  type        = string
 }
 
 variable "location" {
-  default = "{{ location }}"
+  description = "AWS region"
+  default     = "{{ location }}"
+  type        = string
 }
 
 variable "node_count" {
-  default = 2
+  description = "Size of EKS cluster"
+  default     = 2
+  type        = number
 }
 
 variable "machine_type" {
-  default = "{{#if machineType }}{{ machineType}}{{ else }}m4.large{{/if}}"
+  description = "Type of EC2 instances used for the cluster"
+  default     = "{{#if machineType }}{{ machineType}}{{ else }}m4.large{{/if}}"
+  type        = string
 }
 
 variable "k8s_version" {
-  default = "1.15"
+  description = "Kubernetes version to use for the EKS cluster"
+  default     = "1.15"
+  type        = string
 }
