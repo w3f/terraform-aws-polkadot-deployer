@@ -2,8 +2,8 @@ data "aws_region" "current" {}
 
 data "aws_availability_zones" "available" {}
 
-resource "aws_iam_role" "polkadot-{{ clusterName }}" {
-  name = "terraform-eks-polkadot-{{ clusterName }}"
+resource "aws_iam_role" "polkadot-eks" {
+  name = "terraform-eks-polkadot-${var.cluster_name}"
 
   assume_role_policy = <<POLICY
 {
@@ -23,12 +23,12 @@ POLICY
 
 resource "aws_iam_role_policy_attachment" "polkadot-AmazonEKSClusterPolicy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
-  role       = "${aws_iam_role.polkadot-{{ clusterName }}.name}"
+  role       = aws_iam_role.polkadot-eks.name
 }
 
 resource "aws_iam_role_policy_attachment" "polkadot-AmazonEKSServicePolicy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSServicePolicy"
-  role       = "${aws_iam_role.polkadot-{{ clusterName }}.name}"
+  role       = aws_iam_role.polkadot-eks.name
 }
 
 resource "aws_security_group" "polkadot" {
@@ -120,8 +120,8 @@ resource "aws_security_group_rule" "polkadot-ingress-node-https" {
 
 resource "aws_eks_cluster" "polkadot" {
   name     = var.cluster_name
-  role_arn = "${aws_iam_role.polkadot-{{ clusterName }}.arn}"
-  version = var.k8s_version
+  role_arn = aws_iam_role.polkadot-eks.arn
+  version  = var.k8s_version
 
   vpc_config {
     security_group_ids = ["${aws_security_group.polkadot.id}"]
@@ -134,8 +134,8 @@ resource "aws_eks_cluster" "polkadot" {
   ]
 }
 
-resource "aws_iam_role" "polkadot-{{ clusterName }}-node" {
-  name = "terraform-eks-polkadot-{{ clusterName }}-node"
+resource "aws_iam_role" "polkadot-eks-node" {
+  name = "terraform-eks-polkadot-${var.cluster_name}-node"
 
   assume_role_policy = <<POLICY
 {
@@ -153,8 +153,8 @@ resource "aws_iam_role" "polkadot-{{ clusterName }}-node" {
 POLICY
 }
 
-resource "aws_iam_policy" "polkadot-{{ clusterName }}-node-autoscaling" {
-  name        = "terraform-eks-polkadot-{{ clusterName }}-node-autoscaling"
+resource "aws_iam_policy" "polkadot-eks-node-autoscaling" {
+  name        = "terraform-eks-polkadot-${var.cluster_name}-node-autoscaling"
   description = "Node policy to allow autoscaling."
 
   policy = <<EOF
@@ -177,28 +177,28 @@ EOF
 }
 
 resource "aws_iam_role_policy_attachment" "polkadot-node-autoscaling" {
-  policy_arn = "${aws_iam_policy.polkadot-{{ clusterName }}-node-autoscaling.arn}"
-  role       = "${aws_iam_role.polkadot-{{ clusterName }}-node.name}"
+  policy_arn = aws_iam_policy.polkadot-eks-node-autoscaling.arn
+  role       = aws_iam_role.polkadot-eks-node.name
 }
 
 resource "aws_iam_role_policy_attachment" "polkadot-node-AmazonEKSWorkerNodePolicy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
-  role       = "${aws_iam_role.polkadot-{{ clusterName }}-node.name}"
+  role       = aws_iam_role.polkadot-eks-node.name
 }
 
 resource "aws_iam_role_policy_attachment" "polkadot-node-AmazonEKS_CNI_Policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
-  role       = "${aws_iam_role.polkadot-{{ clusterName }}-node.name}"
+  role       = aws_iam_role.polkadot-eks-node.name
 }
 
 resource "aws_iam_role_policy_attachment" "polkadot-node-AmazonEC2ContainerRegistryReadOnly" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
-  role       = "${aws_iam_role.polkadot-{{ clusterName }}-node.name}"
+  role       = aws_iam_role.polkadot-eks-node.name
 }
 
-resource "aws_iam_instance_profile" "polkadot-{{ clusterName }}-node" {
-  name = "terraform-eks-polkadot-{{ clusterName }}"
-  role = "${aws_iam_role.polkadot-{{ clusterName }}-node.name}"
+resource "aws_iam_instance_profile" "polkadot-eks-node" {
+  name = "terraform-eks-polkadot-${var.cluster_name}"
+  role = aws_iam_role.polkadot-eks-node.name
 }
 
 resource "aws_security_group" "polkadot-node" {
@@ -292,7 +292,7 @@ USERDATA
 
 resource "aws_launch_configuration" "polkadot" {
   associate_public_ip_address = true
-  iam_instance_profile        = "${aws_iam_instance_profile.polkadot-{{ clusterName }}-node.name}"
+  iam_instance_profile        = aws_iam_instance_profile.polkadot-eks-node.name
   image_id                    = data.aws_ami.eks-worker.id
   instance_type               = var.machine_type
   name_prefix                 = "terraform-eks-polkadot"
@@ -309,12 +309,12 @@ resource "aws_autoscaling_group" "polkadot" {
   launch_configuration = aws_launch_configuration.polkadot.id
   max_size             = 32
   min_size             = 1
-  name                 = "terraform-eks-polkadot-{{ clusterName }}"
+  name                 = "terraform-eks-polkadot-${var.cluster_name}"
   vpc_zone_identifier  = flatten(["${aws_subnet.polkadot.*.id}"])
 
   tag {
     key                 = "Name"
-    value               = "terraform-eks-polkadot-{{ clusterName }}"
+    value               = "terraform-eks-polkadot-${var.cluster_name}"
     propagate_at_launch = true
   }
 

@@ -1,4 +1,4 @@
 provider "aws" {
-  region  = "{{ location }}"
+  region  = var.location
   version = "~>2.28"
 }
