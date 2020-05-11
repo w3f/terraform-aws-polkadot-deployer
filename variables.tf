@@ -32,13 +32,3 @@ variable "k8s_version" {
   default     = "1.15"
   type        = string
 }
-
-variable "gcp_project_id" {
-  description = "Google cloud project id used for terraform state"
-  type        = string
-}
-
-variable "gcp_credentials" {
-  description = "Either the path to or the contents of a GCP service account key file in JSON format"
-  type        = string
-}
