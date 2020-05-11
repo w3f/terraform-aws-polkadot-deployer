@@ -239,13 +239,13 @@ resource "aws_security_group_rule" "polkadot-node-ingress-cluster" {
 }
 
 resource "aws_security_group_rule" "polkadot-node-ingress-p2p" {
-  description              = "Allow connection to p2p ports from outside the cluster"
-  from_port                = 30100
-  protocol                 = "tcp"
-  security_group_id        = aws_security_group.polkadot-node.id
-  cidr_blocks              = ["0.0.0.0/0"]
-  to_port                  = 30101
-  type                     = "ingress"
+  description       = "Allow connection to p2p ports from outside the cluster"
+  from_port         = 30100
+  protocol          = "tcp"
+  security_group_id = aws_security_group.polkadot-node.id
+  cidr_blocks       = ["0.0.0.0/0"]
+  to_port           = 30101
+  type              = "ingress"
 }
 
 resource "aws_network_acl" "polkadot-acl" {
@@ -338,7 +338,7 @@ kubectl apply -f https://raw.githubusercontent.com/aws/amazon-vpc-cni-k8s/releas
 rm -f kubeconfig cm.yaml
 EOT
     environment = {
-      KUBECONFIG="./kubeconfig"
+      KUBECONFIG = "./kubeconfig"
     }
   }
 
