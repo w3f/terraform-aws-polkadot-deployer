@@ -335,7 +335,7 @@ kubectl delete psp eks.privileged
 
 kubectl apply -f https://raw.githubusercontent.com/aws/amazon-vpc-cni-k8s/release-1.5/config/v1.5/calico.yaml
 
-rm -f kubeconfig
+rm -f kubeconfig cm.yaml
 EOT
     environment = {
       KUBECONFIG="./kubeconfig"
