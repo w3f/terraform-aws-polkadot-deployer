@@ -89,7 +89,7 @@ func testNodeCount(t *testing.T, terraformOptions *terraform.Options) {
     options := k8s.NewKubectlOptions("", kubeconfigFile.Name(), "default")
 
     // Test that the Node count matches the Terraform specification
-    k8s.WaitUntilAllNodesReady(t, options, 20, 10*time.Second)
+    k8s.WaitUntilAllNodesReady(t, options, 40, 10*time.Second)
     nodes := k8s.GetNodes(t, options)
     assert.Equal(t, len(nodes), int(terraformOptions.Vars["node_count"].(float64)))
 }
