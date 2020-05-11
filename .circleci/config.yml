@@ -1,0 +1,28 @@
+version: 2
+
+jobs:
+  fmt:
+    docker:
+      - image: hashicorp/terraform:latest
+    steps:
+      - checkout
+      - run:
+          name: Check terraform formating
+          command: terraform fmt --recursive -check=true
+
+  validate:
+    docker:
+      - image: hashicorp/terraform:latest
+    steps:
+      - checkout
+      - run: terraform init
+      - run:
+          name: Validate terraform files
+          command: terraform validate
+
+workflows:
+  version: 2
+  test-module:
+    jobs:
+      - fmt
+      - validate
