@@ -46,7 +46,7 @@ resource "aws_security_group" "polkadot" {
   }
 
   tags = {
-    Name = "terraform-eks-polkadot"
+    Name = "terraform-eks-polkadot-${var.cluster_name}"
   }
 }
 
@@ -54,7 +54,7 @@ resource "aws_vpc" "polkadot" {
   cidr_block = "10.0.0.0/16"
 
   tags = map(
-    "Name", "terraform-eks-polkadot-node",
+    "Name", "terraform-eks-polkadot-${var.cluster_name}",
     "kubernetes.io/cluster/${var.cluster_name}", "shared",
   )
 }
@@ -67,7 +67,7 @@ resource "aws_subnet" "polkadot" {
   vpc_id            = aws_vpc.polkadot.id
 
   tags = map(
-    "Name", "terraform-eks-polkadot-node",
+    "Name", "terraform-eks-polkadot-node-${var.cluster_name}",
     "kubernetes.io/cluster/${var.cluster_name}", "shared",
   )
 
@@ -77,7 +77,7 @@ resource "aws_internet_gateway" "polkadot" {
   vpc_id = aws_vpc.polkadot.id
 
   tags = {
-    Name = "terraform-eks-polkadot"
+    Name = "terraform-eks-polkadot-${var.cluster_name}"
   }
 }
 
@@ -201,7 +201,7 @@ resource "aws_iam_instance_profile" "polkadot-eks-node" {
 }
 
 resource "aws_security_group" "polkadot-node" {
-  name        = "terraform-eks-polkadot-node"
+  name        = "terraform-eks-polkadot-node-${var.cluster_name}"
   description = "Security group for all nodes in the cluster"
   vpc_id      = aws_vpc.polkadot.id
 
@@ -213,7 +213,7 @@ resource "aws_security_group" "polkadot-node" {
   }
 
   tags = map(
-    "Name", "terraform-eks-polkadot-node",
+    "Name", "terraform-eks-polkadot-node-${var.cluster_name}",
     "kubernetes.io/cluster/${var.cluster_name}", "owned",
   )
 }
@@ -262,7 +262,7 @@ resource "aws_network_acl" "polkadot-acl" {
   }
 
   tags = map(
-    "Name", "terraform-eks-polkadot-node",
+    "Name", "terraform-eks-polkadot-node-${var.cluster_name}",
     "kubernetes.io/cluster/${var.cluster_name}", "owned",
   )
 
