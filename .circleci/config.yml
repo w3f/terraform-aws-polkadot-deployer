@@ -7,7 +7,7 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Check terraform formating
+          name: Check formating
           command: terraform fmt --recursive -check=true
 
   validate:
@@ -17,8 +17,19 @@ jobs:
       - checkout
       - run: terraform init
       - run:
-          name: Validate terraform files
+          name: Validate files
           command: terraform validate
+
+  terratest:
+    docker:
+      - image: web3f/terratest:v0.1.0
+    steps:
+      - checkout
+      - run:
+          description: Integration tests
+          command: |
+            cd test
+            go test -v -timeout 30m
 
 workflows:
   version: 2
@@ -26,3 +37,8 @@ workflows:
     jobs:
       - fmt
       - validate
+      - terratest:
+          requires:
+            - fmt
+            - validate
+
