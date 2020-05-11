@@ -9,4 +9,3 @@ terraform {
     prefix  = "terraform/state/${var.cluster_name}"
   }
 }
-

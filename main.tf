@@ -2,6 +2,8 @@ data "aws_region" "current" {}
 
 data "aws_availability_zones" "available" {}
 
+data "aws_caller_identity" "current" {}
+
 resource "aws_iam_role" "polkadot-eks" {
   name = "terraform-eks-polkadot-${var.cluster_name}"
 
@@ -51,12 +53,10 @@ resource "aws_security_group" "polkadot" {
 resource "aws_vpc" "polkadot" {
   cidr_block = "10.0.0.0/16"
 
-  tags = "${
-    map(
-     "Name", "terraform-eks-polkadot-node",
-     "kubernetes.io/cluster/${var.cluster_name}", "shared",
-    )
-  }"
+  tags = map(
+    "Name", "terraform-eks-polkadot-node",
+    "kubernetes.io/cluster/${var.cluster_name}", "shared",
+  )
 }
 
 resource "aws_subnet" "polkadot" {
@@ -66,12 +66,11 @@ resource "aws_subnet" "polkadot" {
   cidr_block        = "10.0.${count.index}.0/24"
   vpc_id            = aws_vpc.polkadot.id
 
-  tags = "${
-    map(
-     "Name", "terraform-eks-polkadot-node",
-     "kubernetes.io/cluster/${var.cluster_name}", "shared",
-    )
-  }"
+  tags = map(
+    "Name", "terraform-eks-polkadot-node",
+    "kubernetes.io/cluster/${var.cluster_name}", "shared",
+  )
+
 }
 
 resource "aws_internet_gateway" "polkadot" {
@@ -129,8 +128,8 @@ resource "aws_eks_cluster" "polkadot" {
   }
 
   depends_on = [
-    "aws_iam_role_policy_attachment.polkadot-AmazonEKSClusterPolicy",
-    "aws_iam_role_policy_attachment.polkadot-AmazonEKSServicePolicy",
+    aws_iam_role_policy_attachment.polkadot-AmazonEKSClusterPolicy,
+    aws_iam_role_policy_attachment.polkadot-AmazonEKSServicePolicy,
   ]
 }
 
@@ -213,12 +212,10 @@ resource "aws_security_group" "polkadot-node" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = "${
-    map(
-     "Name", "terraform-eks-polkadot-node",
-     "kubernetes.io/cluster/${var.cluster_name}", "owned",
-    )
-  }"
+  tags = map(
+    "Name", "terraform-eks-polkadot-node",
+    "kubernetes.io/cluster/${var.cluster_name}", "owned",
+  )
 }
 
 resource "aws_security_group_rule" "polkadot-node-ingress-self" {
@@ -252,7 +249,7 @@ resource "aws_security_group_rule" "polkadot-node-ingress-p2p" {
 }
 
 resource "aws_network_acl" "polkadot-acl" {
-  vpc_id = "${aws_vpc.polkadot.id}"
+  vpc_id = aws_vpc.polkadot.id
 
   // deny access to AWS Instance Metadata API
   egress {
@@ -264,12 +261,11 @@ resource "aws_network_acl" "polkadot-acl" {
     to_port    = 80
   }
 
-  tags = "${
-    map(
-     "Name", "terraform-eks-polkadot-node",
-     "kubernetes.io/cluster/${var.cluster_name}", "owned",
-    )
-  }"
+  tags = map(
+    "Name", "terraform-eks-polkadot-node",
+    "kubernetes.io/cluster/${var.cluster_name}", "owned",
+  )
+
 }
 
 data "aws_ami" "eks-worker" {
@@ -297,7 +293,7 @@ resource "aws_launch_configuration" "polkadot" {
   instance_type               = var.machine_type
   name_prefix                 = "terraform-eks-polkadot"
   security_groups             = [aws_security_group.polkadot-node.id]
-  user_data_base64            = "${base64encode(local.polkadot-node-userdata)}"
+  user_data_base64            = base64encode(local.polkadot-node-userdata)
 
   lifecycle {
     create_before_destroy = true
