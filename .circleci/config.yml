@@ -26,10 +26,17 @@ jobs:
     steps:
       - checkout
       - run:
+          description: Install dependencies
+          command: |
+            wget -O /usr/local/bin/aws-iam-authenticator https://amazon-eks.s3.us-west-2.amazonaws.com/1.16.8/2020-04-16/bin/linux/amd64/aws-iam-authenticator
+            chmod +x /usr/local/bin/aws-iam-authenticator
+            wget -O /usr/local/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v1.18.0/bin/linux/amd64/kubectl
+            chmod +x /usr/local/bin/kubectl
+      - run:
           description: Integration tests
           command: |
             cd test
-            go test -v -timeout 30m
+            go test -v -timeout 45m
 
 workflows:
   version: 2
