@@ -20,6 +20,16 @@ jobs:
           name: Validate files
           command: terraform validate
 
+  tflint:
+    docker:
+      - image: wata727/tflint
+    steps:
+      - checkout
+      - run:
+          name: TFLint
+          command: tflint
+
+
   terratest:
     docker:
       - image: web3f/terratest:v0.1.0
@@ -43,6 +53,7 @@ workflows:
   test-module:
     jobs:
       - fmt
+      - tflint
       - validate
       - terratest:
           requires:
