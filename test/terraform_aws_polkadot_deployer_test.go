@@ -46,7 +46,7 @@ func createTerraformOptions(t *testing.T, terraformDir string) (*terraform.Optio
     uniqueID := random.UniqueId()
 
     // Set up expected values to be checked later
-    nodeCount := 1
+    nodeCount := 2
     clusterName := fmt.Sprintf("terratest-polkadot-deployer-%s", uniqueID)
     deploymentName := fmt.Sprintf("terratest-polkadot-deployment-%s", uniqueID)
 
@@ -56,7 +56,7 @@ func createTerraformOptions(t *testing.T, terraformDir string) (*terraform.Optio
             "cluster_name":    clusterName,
             "deployment_name": deploymentName,
             "location":        "eu-west-1",
-            "machine_type":    "t2.micro",
+            "machine_type":    "t3.small",
             "node_count":      nodeCount,
         },
         NoColor: true,
