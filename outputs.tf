@@ -7,7 +7,7 @@ metadata:
   namespace: kube-system
 data:
   mapRoles: |
-    - rolearn: arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/terraform-eks-polkadot-${var.cluster_name}-node
+    - rolearn: ${aws_iam_role.polkadot-eks-node.arn}
       username: system:node:{{EC2PrivateDNSName}}
       groups:
         - system:bootstrappers
