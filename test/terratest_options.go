@@ -5,6 +5,7 @@ import (
     "strings"
     "testing"
 
+    "github.com/gruntwork-io/terratest/modules/aws"
     "github.com/gruntwork-io/terratest/modules/random"
     "github.com/gruntwork-io/terratest/modules/terraform"
     "github.com/gruntwork-io/terratest/modules/test-structure"
@@ -13,6 +14,7 @@ import (
 func createTerraformOptions(t *testing.T, terraformDir string) {
     nodeCount := 2
     servicePort := 30100
+    location := aws.GetRandomStableRegion(t, []string{"us-east-1", "us-west-2", "eu-west-1", "eu-central-1"}, nil)
     uniqueID := strings.ToLower(random.UniqueId())
     clusterName := fmt.Sprintf("test-polkadot-%s", uniqueID)
 
@@ -20,7 +22,7 @@ func createTerraformOptions(t *testing.T, terraformDir string) {
         TerraformDir: terraformDir,
         Vars: map[string]interface{} {
             "cluster_name": clusterName,
-            "location":     "eu-west-1",
+            "location":     location,
             "machine_type": "t3.small",
             "node_count":   nodeCount,
         },
