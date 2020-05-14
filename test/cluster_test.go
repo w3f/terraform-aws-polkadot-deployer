@@ -1,14 +1,8 @@
 package test
 
 import (
-    "fmt"
-    "strings"
     "testing"
-
-    "github.com/gruntwork-io/terratest/modules/random"
-    "github.com/gruntwork-io/terratest/modules/terraform"
     "github.com/gruntwork-io/terratest/modules/test-structure"
-
     test_polkadot "github.com/vladimir-babichev/terratest-polkadot-deployer"
 )
 
@@ -19,27 +13,8 @@ func TestTerraformClusterCreation(t *testing.T) {
 
     // Test configuration
     test_structure.RunTestStage(t, "create_terratest_options", func() {
-        nodeCount := 2
-        nodePort := 30100
-        uniqueID := strings.ToLower(random.UniqueId())
-        clusterName := fmt.Sprintf("test-polkadot-%s", uniqueID)
-
-        terraformOptions := &terraform.Options{
-            TerraformDir: terraformDir,
-            Vars: map[string]interface{} {
-                "cluster_name": clusterName,
-                "location":     "eu-west-1",
-                "machine_type": "t3.small",
-                "node_count":   nodeCount,
-            },
-            NoColor: true,
-        }
-
-        test_structure.SaveInt(t, terraformDir, "nodeCount", nodeCount)
-        test_structure.SaveInt(t, terraformDir, "nodePort", nodePort)
-        test_structure.SaveString(t, terraformDir, "clusterName", clusterName)
-        test_structure.SaveString(t, terraformDir, "uniqueID", uniqueID)
-        test_structure.SaveTerraformOptions(t, terraformDir, terraformOptions)
+        createTerraformOptions(t, terraformDir)
+        createHelmOptions(t, terraformDir)
     })
 
     // At the end of the test, run `terraform destroy` to clean up any resources that were created
@@ -59,11 +34,16 @@ func TestTerraformClusterCreation(t *testing.T) {
 
     // Validate cluster size
     test_structure.RunTestStage(t, "validate_node_count", func() {
-        test_polkadot.ValidateNodeCount(t, terraformDir)
+        test_polkadot.TestNodeCount(t, terraformDir)
     })
 
     // Validate external connectivity to the service
     test_structure.RunTestStage(t, "validate_service", func() {
-        test_polkadot.ValidateServiceAvailability(t, terraformDir)
+        test_polkadot.TestServiceAvailability(t, terraformDir)
+    })
+
+    // Validate no resources will change on subsequent terraform executions
+    test_structure.RunTestStage(t, "validate_plan", func() {
+        test_polkadot.TestResourceChanges(t, terraformDir)
     })
 }
