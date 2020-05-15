@@ -3,7 +3,7 @@ package test
 import (
     "testing"
     "github.com/gruntwork-io/terratest/modules/test-structure"
-    test_polkadot "github.com/vladimir-babichev/terratest-polkadot-deployer"
+    test_polkadot "github.com/w3f/terratest-polkadot-deployer"
 )
 
 func TestTerraformClusterCreation(t *testing.T) {
