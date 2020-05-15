@@ -4,12 +4,6 @@ variable "cluster_name" {
   type        = string
 }
 
-variable "deployment_name" {
-  description = "Name of this polkadot deployment"
-  default     = "polkadot"
-  type        = string
-}
-
 variable "location" {
   description = "AWS region"
   type        = string

@@ -2,10 +2,8 @@ data "aws_region" "current" {}
 
 data "aws_availability_zones" "available" {}
 
-data "aws_caller_identity" "current" {}
-
 resource "aws_iam_role" "polkadot-eks" {
-  name = "terraform-eks-polkadot-${var.cluster_name}"
+  name = "polkadot-${var.cluster_name}"
 
   assume_role_policy = <<POLICY
 {
@@ -34,7 +32,7 @@ resource "aws_iam_role_policy_attachment" "polkadot-AmazonEKSServicePolicy" {
 }
 
 resource "aws_security_group" "polkadot" {
-  name        = "terraform-eks-polkadot"
+  name        = "polkadot-${var.cluster_name}"
   description = "Cluster communication with worker nodes"
   vpc_id      = aws_vpc.polkadot.id
 
@@ -46,7 +44,7 @@ resource "aws_security_group" "polkadot" {
   }
 
   tags = {
-    Name = "terraform-eks-polkadot-${var.cluster_name}"
+    Name = "polkadot-${var.cluster_name}"
   }
 }
 
@@ -54,7 +52,7 @@ resource "aws_vpc" "polkadot" {
   cidr_block = "10.0.0.0/16"
 
   tags = map(
-    "Name", "terraform-eks-polkadot-${var.cluster_name}",
+    "Name", "polkadot-${var.cluster_name}",
     "kubernetes.io/cluster/${var.cluster_name}", "shared",
   )
 }
@@ -67,7 +65,7 @@ resource "aws_subnet" "polkadot" {
   vpc_id            = aws_vpc.polkadot.id
 
   tags = map(
-    "Name", "terraform-eks-polkadot-node-${var.cluster_name}",
+    "Name", "polkadot-${var.cluster_name}-node",
     "kubernetes.io/cluster/${var.cluster_name}", "shared",
   )
 
@@ -77,7 +75,7 @@ resource "aws_internet_gateway" "polkadot" {
   vpc_id = aws_vpc.polkadot.id
 
   tags = {
-    Name = "terraform-eks-polkadot-${var.cluster_name}"
+    Name = "polkadot-${var.cluster_name}"
   }
 }
 
@@ -134,7 +132,7 @@ resource "aws_eks_cluster" "polkadot" {
 }
 
 resource "aws_iam_role" "polkadot-eks-node" {
-  name = "terraform-eks-polkadot-${var.cluster_name}-node"
+  name = "polkadot-${var.cluster_name}-node"
 
   assume_role_policy = <<POLICY
 {
@@ -153,7 +151,7 @@ POLICY
 }
 
 resource "aws_iam_policy" "polkadot-eks-node-autoscaling" {
-  name        = "terraform-eks-polkadot-${var.cluster_name}-node-autoscaling"
+  name        = "polkadot-${var.cluster_name}-node-autoscaling"
   description = "Node policy to allow autoscaling."
 
   policy = <<EOF
@@ -196,12 +194,12 @@ resource "aws_iam_role_policy_attachment" "polkadot-node-AmazonEC2ContainerRegis
 }
 
 resource "aws_iam_instance_profile" "polkadot-eks-node" {
-  name = "terraform-eks-polkadot-${var.cluster_name}"
+  name = "polkadot-${var.cluster_name}"
   role = aws_iam_role.polkadot-eks-node.name
 }
 
 resource "aws_security_group" "polkadot-node" {
-  name        = "terraform-eks-polkadot-node-${var.cluster_name}"
+  name        = "polkadot-${var.cluster_name}-node"
   description = "Security group for all nodes in the cluster"
   vpc_id      = aws_vpc.polkadot.id
 
@@ -213,7 +211,7 @@ resource "aws_security_group" "polkadot-node" {
   }
 
   tags = map(
-    "Name", "terraform-eks-polkadot-node-${var.cluster_name}",
+    "Name", "polkadot-${var.cluster_name}-node",
     "kubernetes.io/cluster/${var.cluster_name}", "owned",
   )
 }
@@ -262,7 +260,7 @@ resource "aws_network_acl" "polkadot-acl" {
   }
 
   tags = map(
-    "Name", "terraform-eks-polkadot-node-${var.cluster_name}",
+    "Name", "polkadot-${var.cluster_name}-node",
     "kubernetes.io/cluster/${var.cluster_name}", "owned",
   )
 
@@ -291,7 +289,7 @@ resource "aws_launch_configuration" "polkadot" {
   iam_instance_profile        = aws_iam_instance_profile.polkadot-eks-node.name
   image_id                    = data.aws_ami.eks-worker.id
   instance_type               = var.machine_type
-  name_prefix                 = "terraform-eks-polkadot"
+  name_prefix                 = "polkadot-${var.cluster_name}-"
   security_groups             = [aws_security_group.polkadot-node.id]
   user_data_base64            = base64encode(local.polkadot-node-userdata)
 
@@ -305,12 +303,12 @@ resource "aws_autoscaling_group" "polkadot" {
   launch_configuration = aws_launch_configuration.polkadot.id
   max_size             = 32
   min_size             = 1
-  name                 = "terraform-eks-polkadot-${var.cluster_name}"
+  name                 = "polkadot-${var.cluster_name}"
   vpc_zone_identifier  = flatten(["${aws_subnet.polkadot.*.id}"])
 
   tag {
     key                 = "Name"
-    value               = "terraform-eks-polkadot-${var.cluster_name}"
+    value               = "polkadot-${var.cluster_name}"
     propagate_at_launch = true
   }
 
@@ -324,7 +322,7 @@ resource "aws_autoscaling_group" "polkadot" {
 resource "null_resource" "apply_auth_cm" {
   provisioner "local-exec" {
     command = <<EOT
-sleep 10
+sleep 20
 
 echo "${local.config_map_aws_auth}" > cm.yaml
 echo "${local.kubeconfig}" > kubeconfig

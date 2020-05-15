@@ -32,16 +32,15 @@ jobs:
 
   terratest:
     docker:
-      - image: web3f/terratest:v0.1.0
+      - image: web3f/terratest:v0.2.0
     steps:
       - checkout
       - run:
           description: Install dependencies
           command: |
-            wget -O /usr/local/bin/aws-iam-authenticator https://amazon-eks.s3.us-west-2.amazonaws.com/1.16.8/2020-04-16/bin/linux/amd64/aws-iam-authenticator
-            chmod +x /usr/local/bin/aws-iam-authenticator
-            wget -O /usr/local/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v1.18.0/bin/linux/amd64/kubectl
-            chmod +x /usr/local/bin/kubectl
+            wget -O helm.tgz https://get.helm.sh/helm-v3.2.1-linux-amd64.tar.gz
+            tar -xvf helm.tgz
+            mv linux-amd64/helm /usr/local/bin/
       - run:
           description: Integration tests
           command: |
