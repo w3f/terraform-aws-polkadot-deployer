@@ -121,8 +121,8 @@ resource "aws_eks_cluster" "polkadot" {
   version  = var.k8s_version
 
   vpc_config {
-    security_group_ids = ["${aws_security_group.polkadot.id}"]
-    subnet_ids         = flatten(["${aws_subnet.polkadot.*.id}"])
+    security_group_ids = [aws_security_group.polkadot.id]
+    subnet_ids         = flatten([aws_subnet.polkadot.*.id])
   }
 
   depends_on = [
@@ -304,7 +304,7 @@ resource "aws_autoscaling_group" "polkadot" {
   max_size             = 32
   min_size             = 1
   name                 = "polkadot-${var.cluster_name}"
-  vpc_zone_identifier  = flatten(["${aws_subnet.polkadot.*.id}"])
+  vpc_zone_identifier  = flatten([aws_subnet.polkadot.*.id])
 
   tag {
     key                 = "Name"

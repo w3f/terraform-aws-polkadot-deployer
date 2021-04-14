@@ -9,6 +9,11 @@ variable "location" {
   type        = string
 }
 
+variable "profile" {
+  description = "AWS profile"
+  type        = string
+}
+
 variable "node_count" {
   description = "Size of EKS cluster"
   default     = 2
@@ -23,6 +28,6 @@ variable "machine_type" {
 
 variable "k8s_version" {
   description = "Kubernetes version to use for the EKS cluster"
-  default     = "1.15"
+  default     = "1.21"
   type        = string
 }
