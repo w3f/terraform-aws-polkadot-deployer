@@ -44,12 +44,12 @@ KUBECONFIG
 
 output "config_map_aws_auth" {
   description = "A kubernetes configuration to authenticate to this EKS cluster"
-  value       = "${local.config_map_aws_auth}"
+  value       = local.config_map_aws_auth
   sensitive   = true
 }
 
 output "kubeconfig" {
   description = "kubectl config file contents for this EKS cluster"
-  value       = "${local.kubeconfig}"
+  value       = local.kubeconfig
   sensitive   = true
 }
